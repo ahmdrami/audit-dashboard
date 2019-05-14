@@ -1,5 +1,4 @@
 import React from 'react'
-import './App.css'
 import { Router } from '@reach/router'
 import Home from './pages/Home'
 import Sidebar from './components/Sidebar'
