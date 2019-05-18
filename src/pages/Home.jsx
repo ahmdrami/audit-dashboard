@@ -1,4 +1,4 @@
-import React, { useState, Fragment, useEffect, memo } from 'react'
+import React, { useState, Fragment, useEffect } from 'react'
 import { IconButton, Typography, Avatar, Button } from '@material-ui/core'
 import MaterialCard from '../components/Card'
 import AddCircle from '@material-ui/icons/AddCircleRounded'
@@ -22,11 +22,11 @@ const AddButton = styled(IconButton)`
 const CardContainer = styled.div`
   display: flex;
 `
-const mapIds = audits =>
-  Object.keys(audits).map(key => {
+export const mapIds = data =>
+  Object.keys(data).map(key => {
     return {
       id: key,
-      ...audits[key]
+      ...data[key]
     }
   })
 
@@ -49,7 +49,7 @@ const ButtonContainer = styled.div`
   }
 `
 
-const Home = () => {
+const Home = ({ session }) => {
   const [open, setOpen] = useState(() => false)
   const [auditDb] = useState(() => db.ref('audits'))
   const [audit, setAudit] = useState(() => Audit)
@@ -101,12 +101,14 @@ const Home = () => {
             </ButtonContainer>
           </MaterialCard>
         ))}
-        <MaterialCard>
-          <AddButton onClick={() => setOpen(true)}>
-            <AddCircle />
-          </AddButton>
-          <Typography variant="h6">NEW</Typography>
-        </MaterialCard>
+        {session && (
+          <MaterialCard>
+            <AddButton onClick={() => setOpen(true)}>
+              <AddCircle />
+            </AddButton>
+            <Typography variant="h6">NEW</Typography>
+          </MaterialCard>
+        )}
       </CardContainer>
 
       <NewAudit

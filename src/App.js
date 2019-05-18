@@ -1,40 +1,47 @@
-import React from 'react'
+import React, { useEffect, useState, Fragment } from 'react'
 import { Router } from '@reach/router'
 import Home from './pages/Home'
 import Sidebar from './components/Sidebar'
 import Main from './components/Main'
-import { initializeApp, database } from 'firebase'
+import { initializeApp, database, auth, storage } from 'firebase'
+import Audits from './pages/Audits';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyAc11hLdsnaiU-oM10HMN7nZGSmoDu1xG0',
-  authDomain: 'loot-audit-dashboard.firebaseapp.com',
-  databaseURL: 'https://loot-audit-dashboard.firebaseio.com',
-  projectId: 'loot-audit-dashboard',
-  storageBucket: 'loot-audit-dashboard.appspot.com',
-  messagingSenderId: '675604510519',
-  appId: '1:675604510519:web:1ea7257a5d89504a'
+  apiKey: process.env.REACT_APP_API_KEY,
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+  databaseURL: process.env.REACT_APP_DATABASE_URL,
+  projectId: process.env.REACT_APP_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_APP_ID
 }
 initializeApp(firebaseConfig)
 
 export const db = database()
+export const fbAuth = auth
+export const fbStorage = storage()
 
 function App() {
+  const [session, setSession] = useState(() => false)
+
+  useEffect(() => {
+    fbAuth().onAuthStateChanged(user =>
+      user ? setSession(true) : setSession(false)
+    )
+  }, [])
   return (
-    <div>
-      {/* <AppBar position="fixed">
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-            Clipped drawer
-          </Typography>
-        </Toolbar>
-      </AppBar> */}
-      <Sidebar />
+    <Fragment>
+      <Sidebar session={session} />
       <Main>
         <Router>
-          <Home default />
+          <Home default session={session} />
+          <Audits path="/audits"  session={session} >
+            <Audits default/>
+            
+          </Audits>
         </Router>
       </Main>
-    </div>
+    </Fragment>
   )
 }
 
