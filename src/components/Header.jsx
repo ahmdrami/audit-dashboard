@@ -4,7 +4,8 @@ import { Typography } from '@material-ui/core'
 
 const StyledHeader = styled.div`
   padding-bottom: 2em;
-  margin: 2em 0;
+  margin-top: 4em;
+  margin-bottom: 2em;
   border-bottom: 2px dashed #afafaf;
   display: flex;
   flex-direction: column;

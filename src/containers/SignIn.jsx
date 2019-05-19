@@ -4,7 +4,8 @@ import {
   DialogTitle,
   DialogContent,
   TextField,
-  Button
+  Fab,
+  Typography
 } from '@material-ui/core'
 import { fbAuth } from '../App'
 
@@ -12,10 +13,10 @@ const SignIn = memo(({ open, onClose }) => {
   const [form, setForm] = useState(() => ({ email: '', password: '' }))
 
   const onChange = ({ currentTarget: { name, value } }) =>
-    setForm({
-      ...form,
+    setForm(s => ({
+      ...s,
       [name]: value
-    })
+    }))
 
   const onLogin = async e => {
     e.preventDefault()
@@ -34,11 +35,12 @@ const SignIn = memo(({ open, onClose }) => {
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
     >
-      <DialogTitle id="alert-dialog-title">Login</DialogTitle>
       <DialogContent>
+        <Typography variant="h4">Login</Typography>
         <form onSubmit={onLogin}>
           <TextField
             fullWidth
+            variant="outlined"
             margin="normal"
             label="Email"
             value={form.emailemail}
@@ -49,6 +51,7 @@ const SignIn = memo(({ open, onClose }) => {
           />
           <TextField
             fullWidth
+            variant="outlined"
             margin="normal"
             label="Password"
             value={form.password}
@@ -58,15 +61,15 @@ const SignIn = memo(({ open, onClose }) => {
             type="password"
           />
 
-          <Button
+          <Fab
             fullWidth
             onClick={onLogin}
             color="primary"
-            variant="contained"
+            variant="extended"
             type="submit"
           >
             Login
-          </Button>
+          </Fab>
         </form>
       </DialogContent>
     </Dialog>

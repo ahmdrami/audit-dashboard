@@ -11,6 +11,7 @@ import Audits from './pages/Audits'
 import SingleAudit from './pages/SingleAudit'
 import { CssBaseline, MuiThemeProvider } from '@material-ui/core'
 import theme from './theme'
+import Appbar from './components/Appbar'
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -25,7 +26,10 @@ firebase.initializeApp(firebaseConfig)
 
 export const db = firebase.database()
 export const fbAuth = firebase.auth
-firebase.storage().ref().constructor.prototype.putFiles = function(files, folder) {
+firebase.storage().ref().constructor.prototype.putFiles = function(
+  files,
+  folder
+) {
   var ref = this
   return Promise.all(
     files.map(function(file) {
@@ -47,6 +51,7 @@ function App() {
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
+      <Appbar session={session}/>
       <Sidebar session={session} />
       <Main>
         <Router>
