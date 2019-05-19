@@ -23,10 +23,13 @@ const CardContainer = styled.div`
   display: flex;
 `
 export const mapIds = data =>
+  data &&
   Object.keys(data).map(key => {
+    const isChildren = Object.keys(data[key]).includes('children')
     return {
       id: key,
-      ...data[key]
+      ...data[key],
+      ...(isChildren && { children: mapIds(data[key].children) })
     }
   })
 

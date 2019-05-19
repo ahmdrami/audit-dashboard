@@ -4,7 +4,8 @@ import Home from './pages/Home'
 import Sidebar from './components/Sidebar'
 import Main from './components/Main'
 import { initializeApp, database, auth, storage } from 'firebase'
-import Audits from './pages/Audits';
+import Audits from './pages/Audits'
+import SingleAudit from './pages/SingleAudit'
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -19,7 +20,15 @@ initializeApp(firebaseConfig)
 
 export const db = database()
 export const fbAuth = auth
+storage().ref().constructor.prototype.putFiles = function(files) { 
+  var ref = this;
+  return Promise.all(files.map(function(file) {
+    return ref.child(file.name).put(file);
+  }));
+}
+
 export const fbStorage = storage()
+
 
 function App() {
   const [session, setSession] = useState(() => false)
@@ -35,9 +44,8 @@ function App() {
       <Main>
         <Router>
           <Home default session={session} />
-          <Audits path="/audits"  session={session} >
-            <Audits default/>
-            
+          <Audits path="audits" session={session}>
+            <SingleAudit path=":categoryId" />
           </Audits>
         </Router>
       </Main>

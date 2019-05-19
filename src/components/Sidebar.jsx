@@ -1,38 +1,38 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
 import {
   Drawer,
   List,
   ListItem,
   ListItemText,
-  Divider
+  Divider,
+  Collapse
 } from '@material-ui/core'
 import styled from 'styled-components'
 import SignIn from '../containers/SignIn'
-import { fbAuth } from '../App'
+import { fbAuth, db } from '../App'
 import { navigate } from '@reach/router'
+import { mapIds } from '../pages/Home'
 
 const StyledDrawer = styled(Drawer)`
   && {
     > div {
+      padding-top: 100px;
       width: 200px;
     }
   }
 `
-const Menu = [
-  {
-    url: '/',
-    label: 'Home',
-    id: 1
-  },
-  {
-    url: '/audits',
-    label: 'Audits',
-    id: 2
-  }
-]
 
 const Sidebar = ({ session }) => {
   const [open, setOpen] = useState(() => false)
+  const [menu, setMenu] = useState(() => [])
+
+  useEffect(() => {
+    db.ref('menu').on('value', snapshot => {
+      setMenu(mapIds(snapshot.val()))
+      console.log(mapIds(snapshot.val()));
+      
+    })
+  }, [])
   const onClose = () => setOpen(false)
 
   const onClick = url => () => {
@@ -47,7 +47,7 @@ const Sidebar = ({ session }) => {
   }
 
   const renderNav = m =>
-    m.map(({ id, url, label }) => (
+    m.map(({ id, url, label, children }) => (
       <Fragment key={id}>
         <ListItem button onClick={onClick(url)}>
           <ListItemText inset primary={label}>
@@ -55,13 +55,20 @@ const Sidebar = ({ session }) => {
           </ListItemText>
         </ListItem>
         <Divider />
+        {children && (
+          <Collapse in={true} timeout={1} unmountOnExit>
+            <List component="div" disablePadding>
+              {renderNav(children)}
+            </List>
+          </Collapse>
+        )}
       </Fragment>
     ))
   return (
     <Fragment>
       <StyledDrawer variant="permanent">
         <List>
-          {renderNav(Menu)}
+          {renderNav(menu)}
           <ListItem
             button
             key="login"
