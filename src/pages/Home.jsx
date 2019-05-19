@@ -1,18 +1,23 @@
-import React, { useState, Fragment, useEffect } from 'react'
-import { IconButton, Typography, Avatar, Button } from '@material-ui/core'
+import React, { useState, useEffect } from 'react'
+import { Typography, Avatar, Button, Fab } from '@material-ui/core'
 import MaterialCard from '../components/Card'
-import AddCircle from '@material-ui/icons/AddCircleRounded'
+import AddCircle from '@material-ui/icons/AddRounded'
 import styled from 'styled-components'
-import NewAudit from '../containers/NewAudit'
+import NewAudit from '../components/NewAudit'
 import { db } from '../App'
+import Header from '../components/Header'
+import { calculateAverage } from '../utils'
 
 const Audit = {
   score: 0,
   title: '',
   description: ''
 }
-const AddButton = styled(IconButton)`
+const AddButton = styled(Fab)`
   && {
+    position: fixed;
+    bottom: 4em;
+    right: 4em;
     svg {
       width: 2em;
       height: 2em;
@@ -21,17 +26,19 @@ const AddButton = styled(IconButton)`
 `
 const CardContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
 `
 export const mapIds = data =>
-  data &&
-  Object.keys(data).map(key => {
-    const isChildren = Object.keys(data[key]).includes('children')
-    return {
-      id: key,
-      ...data[key],
-      ...(isChildren && { children: mapIds(data[key].children) })
-    }
-  })
+  (data &&
+    Object.keys(data).map(key => {
+      const isChildren = Object.keys(data[key]).includes('children')
+      return {
+        id: key,
+        ...data[key],
+        ...(isChildren && { children: mapIds(data[key].children) })
+      }
+    })) ||
+  []
 
 const Score = styled(Avatar)`
   && {
@@ -53,75 +60,99 @@ const ButtonContainer = styled.div`
 `
 
 const Home = ({ session }) => {
-  const [open, setOpen] = useState(() => false)
-  const [auditDb] = useState(() => db.ref('audits'))
-  const [audit, setAudit] = useState(() => Audit)
-  const [audits, setAudits] = useState(() => [])
+  const [state, setState] = useState(() => ({
+    open: false,
+    audit: Audit,
+    audits: [],
+    fetching: false
+  }))
+  const [auditDb] = useState(() => db)
 
   useEffect(() => {
-    auditDb.on('value', snapshot => setAudits(mapIds(snapshot.val())))
+    auditDb
+      .ref('audits')
+      .on('value', snapshot =>
+        setState(s => ({ ...s, audits: mapIds(snapshot.val()) }))
+      )
   }, [auditDb])
 
   const onChange = ({ currentTarget: { name, value } }) =>
-    setAudit({
-      ...audit,
-      [name]: value
-    })
+    setState(s => ({
+      ...s,
+      audit: {
+        ...s.audit,
+        [name]: value
+      }
+    }))
   const onSave = () => {
+    const { audit } = state
     if (!audit.id) {
-      auditDb.push(audit)
+      auditDb.ref('audits').push(audit)
     } else {
       const { id, title, score, description } = audit
-      db.ref(`audits/${id}`).update({ title, score, description })
+      auditDb.ref(`audits/${id}`).update({ title, score, description })
     }
-    setOpen(false)
+    toggleModal(false)
   }
 
+  const toggleModal = state => setState(s => ({ ...s, open: state }))
   const onEdit = id => () => {
-    setAudit(audits.find(audit => audit.id === id))
-    setOpen(true)
+    setState(s => ({
+      ...s,
+      audit: s.audits.find(audit => audit.id === id),
+      open: true
+    }))
   }
   const onDelete = id => () => {
-    db.ref(`audits/${id}`).remove(null)
+    auditDb.ref(`audits/${id}`).remove(null)
   }
+
+  const newModal = () => setState(s => ({ ...s, open: true, audit: Audit }))
   return (
-    <Fragment>
+    <>
+      <Header
+        title="Design audit board"
+        subtitle={`Score: ${calculateAverage(state.audits)}`}
+      />
       <CardContainer>
-        {audits.map(({ id, score, title, description }) => (
+        {state.audits.map(({ id, score, title, description }) => (
           <MaterialCard key={id}>
             <Score>{score}</Score>
             <Typography variant="h5">{title}</Typography>
             <Typography align="center" variant="caption">
               {description}
             </Typography>
-            <ButtonContainer>
-              <Button color="primary" variant="outlined" onClick={onDelete(id)}>
-                Delete
-              </Button>
-              <Button color="primary" variant="outlined" onClick={onEdit(id)}>
-                Edit
-              </Button>
-            </ButtonContainer>
+            {session && (
+              <ButtonContainer>
+                <Button
+                  color="primary"
+                  variant="outlined"
+                  onClick={onDelete(id)}
+                >
+                  Delete
+                </Button>
+                <Button color="primary" variant="outlined" onClick={onEdit(id)}>
+                  Edit
+                </Button>
+              </ButtonContainer>
+            )}
           </MaterialCard>
         ))}
         {session && (
-          <MaterialCard>
-            <AddButton onClick={() => setOpen(true)}>
-              <AddCircle />
-            </AddButton>
-            <Typography variant="h6">NEW</Typography>
-          </MaterialCard>
+          <AddButton color="primary" onClick={newModal}>
+            <AddCircle />
+          </AddButton>
         )}
       </CardContainer>
 
       <NewAudit
-        open={open}
+        open={state.open}
         onSave={onSave}
         onChange={onChange}
-        onClose={() => setOpen(false)}
-        audit={audit}
+        onClose={() => toggleModal(false)}
+        audit={state.audit}
       />
-    </Fragment>
+    </>
   )
 }
 

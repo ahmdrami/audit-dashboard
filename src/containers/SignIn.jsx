@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -8,7 +8,7 @@ import {
 } from '@material-ui/core'
 import { fbAuth } from '../App'
 
-const SignIn = ({ open, onClose }) => {
+const SignIn = memo(({ open, onClose }) => {
   const [form, setForm] = useState(() => ({ email: '', password: '' }))
 
   const onChange = ({ currentTarget: { name, value } }) =>
@@ -71,7 +71,6 @@ const SignIn = ({ open, onClose }) => {
       </DialogContent>
     </Dialog>
   )
-}
-
+})
 
 export default SignIn

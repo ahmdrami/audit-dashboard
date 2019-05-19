@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -8,7 +8,7 @@ import {
   TextField
 } from '@material-ui/core'
 
-const NewAudit = ({ audit, open, onClose, onChange, onSave }) => {
+const NewAudit = memo(({ audit, open, onClose, onChange, onSave }) => {
   return (
     <Dialog
       open={open}
@@ -57,6 +57,6 @@ const NewAudit = ({ audit, open, onClose, onChange, onSave }) => {
       </DialogActions>
     </Dialog>
   )
-}
+})
 
 export default NewAudit

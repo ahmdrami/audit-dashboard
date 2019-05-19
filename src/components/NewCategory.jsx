@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { TextField, Button } from '@material-ui/core'
 
-export default function NewCategory({ onChange, category, onSave }) {
+const NewCategory = memo(({ onChange, category, onSave }) => {
   return (
     <form onSubmit={onSave}>
       <TextField
@@ -28,4 +28,6 @@ export default function NewCategory({ onChange, category, onSave }) {
       </Button>
     </form>
   )
-}
+})
+
+export default NewCategory

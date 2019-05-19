@@ -1,29 +1,40 @@
-import React, { useState } from 'react'
+import React, { useState, memo } from 'react'
 import {
   List,
   ListItem,
   ListItemAvatar,
   Avatar,
   ListItemText,
-  ListItemSecondaryAction,
-  Paper,
-  Button
+  Button,
+  LinearProgress,
+  ListSubheader,
+  Divider
 } from '@material-ui/core'
 import styled from 'styled-components'
 import { fbStorage, db } from '../App'
 
-const StyledPaper = styled(Paper)`
-  margin-top: 1em;
+const StyledListItem = styled(ListItem)`
+  && {
+    display: flex;
+    flex-wrap: wrap;
+  }
 `
+const StyledProgress = styled(LinearProgress)`
+  && {
+    width: 100%;
+    margin-top: 8px;
+  }
+`
+const Upload = memo(({ images, categoryId, onUploadComplete }) => {
+  const [imagesDbRef] = useState(() => db.ref(`images/${categoryId}`))
+  const [fetching, setFetching] = useState(() => false)
 
-const Upload = ({ images, categoryId }) => {
-  const [imagesDbRef] = useState(() => db.ref('images'))
-  console.log(categoryId)
   const uploadFiles = async () => {
-    console.log('upload started')
+    setFetching(true)
     try {
-      await uploadFilesMeta(await fbStorage.ref().putFiles(images))
-      console.log('upload done')
+      await uploadFilesMeta(await fbStorage.ref().putFiles(images, categoryId))
+      setFetching(true)
+      onUploadComplete()
     } catch (error) {
       console.log(error)
     }
@@ -39,7 +50,7 @@ const Upload = ({ images, categoryId }) => {
           .once('value')
 
         if (!imageExist.val()) {
-          imagesDbRef.push({
+          await imagesDbRef.push({
             categoryId,
             name: metadata.name,
             url: url,
@@ -49,32 +60,36 @@ const Upload = ({ images, categoryId }) => {
       })
     )
   }
+  const previewImage = img => URL.createObjectURL(img)
   return (
     (images.length > 0 && (
-      <StyledPaper elevation={1}>
-        <List dense>
-          {images.map(({ name }, index) => (
-            <ListItem key={name + index} button>
+      <>
+        <List
+          dense
+          subheader={
+            <ListSubheader component="div">
+             Category: {categoryId}
+            </ListSubheader>
+          }
+        >
+          {images.map((img, index) => (
+            <StyledListItem key={img.name + index} button>
               <ListItemAvatar>
-                <Avatar
-                  alt={`Avatar n°${name}`}
-                  src={`/static/images/avatar/${name + 1}.jpg`}
-                />
+                <Avatar alt={`Avatar n°${img.name}`} src={previewImage(img)} />
               </ListItemAvatar>
-              <ListItemText primary={name} />
-              {/* <ListItemSecondaryAction>
-         
-        </ListItemSecondaryAction> */}
-            </ListItem>
+              <ListItemText primary={img.name} />
+              {fetching && <StyledProgress />}
+              <Divider />
+            </StyledListItem>
           ))}
         </List>
         <Button color="primary" variant="contained" onClick={uploadFiles}>
           Upload
         </Button>
-      </StyledPaper>
+      </>
     )) ||
     null
   )
 }
-
+)
 export default Upload

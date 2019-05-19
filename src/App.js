@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Router } from '@reach/router'
 import Home from './pages/Home'
 import Sidebar from './components/Sidebar'
@@ -6,6 +6,8 @@ import Main from './components/Main'
 import { initializeApp, database, auth, storage } from 'firebase'
 import Audits from './pages/Audits'
 import SingleAudit from './pages/SingleAudit'
+import { CssBaseline, MuiThemeProvider } from '@material-ui/core'
+import theme from './theme'
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -20,15 +22,16 @@ initializeApp(firebaseConfig)
 
 export const db = database()
 export const fbAuth = auth
-storage().ref().constructor.prototype.putFiles = function(files) { 
-  var ref = this;
-  return Promise.all(files.map(function(file) {
-    return ref.child(file.name).put(file);
-  }));
+storage().ref().constructor.prototype.putFiles = function(files, folder) {
+  var ref = this
+  return Promise.all(
+    files.map(function(file) {
+      return ref.child(`${folder}/${file.name}`).put(file)
+    })
+  )
 }
 
 export const fbStorage = storage()
-
 
 function App() {
   const [session, setSession] = useState(() => false)
@@ -39,17 +42,18 @@ function App() {
     )
   }, [])
   return (
-    <Fragment>
+    <MuiThemeProvider theme={theme}>
+      <CssBaseline />
       <Sidebar session={session} />
       <Main>
         <Router>
           <Home default session={session} />
           <Audits path="audits" session={session}>
-            <SingleAudit path=":categoryId" />
+            <SingleAudit path=":categoryId" session={session} />
           </Audits>
         </Router>
       </Main>
-    </Fragment>
+    </MuiThemeProvider>
   )
 }
 

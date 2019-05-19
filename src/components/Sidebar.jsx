@@ -1,17 +1,23 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import React, { Fragment, useState, useEffect, memo } from 'react'
 import {
   Drawer,
   List,
   ListItem,
   ListItemText,
-  Divider,
-  Collapse
+  Collapse,
+  ListItemIcon
 } from '@material-ui/core'
 import styled from 'styled-components'
 import SignIn from '../containers/SignIn'
 import { fbAuth, db } from '../App'
 import { navigate } from '@reach/router'
 import { mapIds } from '../pages/Home'
+import {
+  LockRounded,
+  LockOpenRounded,
+  FiberManualRecordRounded,
+  FiberSmartRecordRounded
+} from '@material-ui/icons'
 
 const StyledDrawer = styled(Drawer)`
   && {
@@ -21,16 +27,19 @@ const StyledDrawer = styled(Drawer)`
     }
   }
 `
+const StyledListItem = styled(ListItem)`
+  && {
+    ${({ nested }) => nested === 'PAD' && `padding-left: 2em;`}
+  }
+`
 
-const Sidebar = ({ session }) => {
+const Sidebar = memo(({ session }) => {
   const [open, setOpen] = useState(() => false)
   const [menu, setMenu] = useState(() => [])
 
   useEffect(() => {
     db.ref('menu').on('value', snapshot => {
       setMenu(mapIds(snapshot.val()))
-      console.log(mapIds(snapshot.val()));
-      
     })
   }, [])
   const onClose = () => setOpen(false)
@@ -46,42 +55,55 @@ const Sidebar = ({ session }) => {
     return navigate(url)
   }
 
-  const renderNav = m =>
+  const renderNav = (m, nested = false) =>
     m.map(({ id, url, label, children }) => (
       <Fragment key={id}>
-        <ListItem button onClick={onClick(url)}>
+        <StyledListItem
+          nested={nested ? 'PAD' : ''}
+          button
+          onClick={onClick(url)}
+        >
+          <ListItemIcon>
+            {nested ? (
+              <FiberSmartRecordRounded />
+            ) : (
+              <FiberManualRecordRounded />
+            )}
+          </ListItemIcon>
           <ListItemText inset primary={label}>
             {label}
           </ListItemText>
-        </ListItem>
-        <Divider />
+        </StyledListItem>
         {children && (
-          <Collapse in={true} timeout={1} unmountOnExit>
+          <Collapse in={true} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {renderNav(children)}
+              {renderNav(children, true)}
             </List>
           </Collapse>
         )}
       </Fragment>
     ))
   return (
-    <Fragment>
+    <>
       <StyledDrawer variant="permanent">
-        <List>
+        <List component="nav">
           {renderNav(menu)}
           <ListItem
             button
             key="login"
             onClick={onClick(session ? 'logout' : 'login')}
           >
+            <ListItemIcon>
+              {session ? <LockOpenRounded /> : <LockRounded />}
+            </ListItemIcon>
             <ListItemText inset primary={session ? 'Logout' : 'Login'} />
           </ListItem>
         </List>
       </StyledDrawer>
 
       <SignIn open={open} onClose={onClose} />
-    </Fragment>
+    </>
   )
-}
+})
 
 export default Sidebar
