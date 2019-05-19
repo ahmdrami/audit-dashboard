@@ -3,7 +3,10 @@ import { Router } from '@reach/router'
 import Home from './pages/Home'
 import Sidebar from './components/Sidebar'
 import Main from './components/Main'
-import { initializeApp, database, auth, storage } from 'firebase'
+import firebase from 'firebase/app'
+import 'firebase/database'
+import 'firebase/auth'
+import 'firebase/storage'
 import Audits from './pages/Audits'
 import SingleAudit from './pages/SingleAudit'
 import { CssBaseline, MuiThemeProvider } from '@material-ui/core'
@@ -18,11 +21,11 @@ const firebaseConfig = {
   messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
   appId: process.env.REACT_APP_APP_ID
 }
-initializeApp(firebaseConfig)
+firebase.initializeApp(firebaseConfig)
 
-export const db = database()
-export const fbAuth = auth
-storage().ref().constructor.prototype.putFiles = function(files, folder) {
+export const db = firebase.database()
+export const fbAuth = firebase.auth
+firebase.storage().ref().constructor.prototype.putFiles = function(files, folder) {
   var ref = this
   return Promise.all(
     files.map(function(file) {
@@ -31,7 +34,7 @@ storage().ref().constructor.prototype.putFiles = function(files, folder) {
   )
 }
 
-export const fbStorage = storage()
+export const fbStorage = firebase.storage()
 
 function App() {
   const [session, setSession] = useState(() => false)
