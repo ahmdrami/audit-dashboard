@@ -28,8 +28,8 @@ const Audits = ({ children, session }) => {
 
   const [category, setCategory] = useState(() => initialCategory)
 
-  const onChange = ({ currentTarget: { name, value } }) =>
-    setCategory({ ...category, [name]: value })
+  const onChange = ({ currentTarget: {value } }) =>
+    setCategory(() => ({ label: value, url: `/audits/${value.replace(/ /g, '-').toLowerCase()}`  }))
 
   const onClose = () => setOpen(false)
   const onClick = () => setOpen(true)

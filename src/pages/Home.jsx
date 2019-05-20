@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Fragment } from 'react'
 import { Typography, Avatar, Button, Fab } from '@material-ui/core'
 import MaterialCard from '../components/Card'
 import AddCircle from '@material-ui/icons/AddRounded'
@@ -7,6 +7,7 @@ import NewAudit from '../components/NewAudit'
 import { db } from '../App'
 import Header from '../components/Header'
 import { calculateAverage } from '../utils'
+import Todo from '../containers/Todo'
 
 const Audit = {
   score: 0,
@@ -59,7 +60,7 @@ const ButtonContainer = styled.div`
   }
 `
 
-const Home = ({ session }) => {
+const Home = ({ session, children }) => {
   const [state, setState] = useState(() => ({
     open: false,
     audit: Audit,
@@ -118,7 +119,9 @@ const Home = ({ session }) => {
         {state.audits.map(({ id, score, title, description }) => (
           <MaterialCard key={id}>
             <Score>{score}</Score>
-            <Typography variant="h5">{title}</Typography>
+            <Typography align="center" variant="h5">
+              {title}
+            </Typography>
             <Typography align="center" variant="caption">
               {description}
             </Typography>
@@ -138,20 +141,22 @@ const Home = ({ session }) => {
             )}
           </MaterialCard>
         ))}
-        {session && (
+      </CardContainer>
+      <Todo session={session} />
+      {session && (
+        <Fragment>
           <AddButton color="primary" onClick={newModal}>
             <AddCircle />
           </AddButton>
-        )}
-      </CardContainer>
-
-      <NewAudit
-        open={state.open}
-        onSave={onSave}
-        onChange={onChange}
-        onClose={() => toggleModal(false)}
-        audit={state.audit}
-      />
+          <NewAudit
+            open={state.open}
+            onSave={onSave}
+            onChange={onChange}
+            onClose={() => toggleModal(false)}
+            audit={state.audit}
+          />
+        </Fragment>
+      )}
     </>
   )
 }

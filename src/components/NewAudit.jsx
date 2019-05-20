@@ -9,6 +9,7 @@ import {
 } from '@material-ui/core'
 
 const NewAudit = memo(({ audit, open, onClose, onChange, onSave }) => {
+  const { id, score, title, description } = audit
   return (
     <Dialog
       open={open}
@@ -17,7 +18,7 @@ const NewAudit = memo(({ audit, open, onClose, onChange, onSave }) => {
       aria-describedby="alert-dialog-description"
     >
       <DialogTitle id="alert-dialog-title">
-        {audit.id ? 'Edit audit' : 'Create a new entry'}
+        {id ? 'Edit audit' : 'Create a new entry'}
       </DialogTitle>
       <DialogContent>
         <TextField
@@ -25,7 +26,7 @@ const NewAudit = memo(({ audit, open, onClose, onChange, onSave }) => {
           margin="normal"
           fullWidth
           label="Score"
-          value={audit.score}
+          value={score}
           onChange={onChange}
         />
         <TextField
@@ -33,7 +34,7 @@ const NewAudit = memo(({ audit, open, onClose, onChange, onSave }) => {
           margin="normal"
           fullWidth
           label="Title"
-          value={audit.title}
+          value={title}
           onChange={onChange}
         />
         <TextField
@@ -43,7 +44,7 @@ const NewAudit = memo(({ audit, open, onClose, onChange, onSave }) => {
           multiline
           rowsMax="4"
           label="Description"
-          value={audit.description}
+          value={description}
           onChange={onChange}
         />
       </DialogContent>
@@ -51,8 +52,14 @@ const NewAudit = memo(({ audit, open, onClose, onChange, onSave }) => {
         <Button onClick={onClose} color="primary">
           Cancel
         </Button>
-        <Button onClick={onSave} color="primary" variant="contained" autoFocus>
-          {audit.id ? 'Update' : 'Save '}
+        <Button
+          onClick={onSave}
+          color="primary"
+          variant="contained"
+          disabled={!score || !title || !description}
+          autoFocus
+        >
+          {id ? 'Update' : 'Save '}
         </Button>
       </DialogActions>
     </Dialog>

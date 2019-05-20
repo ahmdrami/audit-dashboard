@@ -51,7 +51,7 @@ function App() {
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
-      <Appbar session={session}/>
+      <Appbar session={session} />
       <Sidebar session={session} />
       <Main>
         <Router>

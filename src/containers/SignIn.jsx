@@ -61,7 +61,6 @@ const SignIn = memo(({ open, onClose }) => {
           />
 
           <Fab
-            fullWidth
             onClick={onLogin}
             color="primary"
             variant="extended"
